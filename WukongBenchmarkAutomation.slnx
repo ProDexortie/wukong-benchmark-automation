@@ -1,3 +1,8 @@
 <Solution>
-  <Project Path="WukongBenchmarkAutomation/WukongBenchmarkAutomation.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/WukongBenchmarkAutomation/WukongBenchmarkAutomation.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WukongBenchmarkAutomation.Tests/WukongBenchmarkAutomation.Tests.csproj" />
+  </Folder>
 </Solution>
