@@ -76,4 +76,21 @@ public class ReportPrinterTests
         Assert.Contains("ВНИМАНИЕ: игра применила не все запрошенные настройки:", report);
         Assert.Contains("CPU-тест: разрешение запрошено 1280x720, в результате 1920×1080", report);
     }
+
+    [Fact]
+    public void Build_FormatsQualityLevelsAsHumanReadableStrings()
+    {
+        var cpuProfile = BenchmarkProfile.CreateCpuProfile(1280, 720, 2560, 1440);
+        var gpuProfile = BenchmarkProfile.CreateGpuProfile(2560, 1440, rayTracing: true);
+
+        var cpuResult = CreateSampleResult(194.0, "1280×720", qualityLevel: 6, rtx: 0);
+        var gpuResult = CreateSampleResult(27.0, "2560×1440", qualityLevel: 5, rtx: 3);
+
+        var report = ReportPrinter.Build(cpuResult, gpuResult, cpuProfile, gpuProfile);
+
+        Assert.Contains("Пользовательское", report);
+        Assert.Contains("Реалистичное", report);
+        Assert.Contains("Низкое", report);
+        Assert.Contains("Вкл (Ультра)", report);
+    }
 }
