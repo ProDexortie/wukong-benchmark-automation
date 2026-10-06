@@ -18,7 +18,7 @@ public class BenchmarkResult
     public string GPUModel { get; set; } = "";
     public string GpuDriverVer { get; set; } = "";
     public string VideoMemSize { get; set; } = "";
-    public string SysMemSize { get; set; } = "";
+    public string SysMem { get; set; } = "";
 
     // Настройки с которыми был проведен бенчмарк
     public string ScreenResolution { get; set; } = "";
