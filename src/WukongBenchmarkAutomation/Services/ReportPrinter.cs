@@ -45,17 +45,17 @@ public class ReportPrinter : IReportPrinter
         sb.AppendLine("  " + new string('-', 70));
         Text(sb, "Разрешение", cpu.ScreenResolution, gpu.ScreenResolution);
         Text(sb, "Разрешение рендеринга (ImageQuality)", cpu.ImageQuality.ToString(), gpu.ImageQuality.ToString());
-        Text(sb, "Общий уровень качества", cpu.QualityLevel.ToString(), gpu.QualityLevel.ToString());
-        Text(sb, "Дальность прорисовки", cpu.ViewDistance.ToString(), gpu.ViewDistance.ToString());
-        Text(sb, "Сглаживание", cpu.AntiAliasing.ToString(), gpu.AntiAliasing.ToString());
-        Text(sb, "Постобработка", cpu.PostProcessing.ToString(), gpu.PostProcessing.ToString());
-        Text(sb, "Тени", cpu.ShadowQuality.ToString(), gpu.ShadowQuality.ToString());
-        Text(sb, "Текстуры", cpu.TextureQuality.ToString(), gpu.TextureQuality.ToString());
-        Text(sb, "Материалы", cpu.MaterialQuality.ToString(), gpu.MaterialQuality.ToString());
-        Text(sb, "Растительность", cpu.VegetationQuality.ToString(), gpu.VegetationQuality.ToString());
+        Text(sb, "Общий уровень качества", FormatPreset(cpu.QualityLevel), FormatPreset(gpu.QualityLevel));
+        Text(sb, "Дальность прорисовки", FormatQuality(cpu.ViewDistance), FormatQuality(gpu.ViewDistance));
+        Text(sb, "Сглаживание", FormatQuality(cpu.AntiAliasing), FormatQuality(gpu.AntiAliasing));
+        Text(sb, "Постобработка", FormatQuality(cpu.PostProcessing), FormatQuality(gpu.PostProcessing));
+        Text(sb, "Тени", FormatQuality(cpu.ShadowQuality), FormatQuality(gpu.ShadowQuality));
+        Text(sb, "Текстуры", FormatQuality(cpu.TextureQuality), FormatQuality(gpu.TextureQuality));
+        Text(sb, "Материалы", FormatQuality(cpu.MaterialQuality), FormatQuality(gpu.MaterialQuality));
+        Text(sb, "Растительность", FormatQuality(cpu.VegetationQuality), FormatQuality(gpu.VegetationQuality));
         Text(sb, "Размытие в движении", OnOff(cpu.MotionBlur), OnOff(gpu.MotionBlur));
-        Text(sb, "Трассировка лучей (RTX)", OnOff(cpu.Rtx), OnOff(gpu.Rtx));
-        Text(sb, "DLSS", OnOff(cpu.Dlss), OnOff(gpu.Dlss));
+        Text(sb, "Трассировка лучей", FormatRayTracing(cpu.Rtx), FormatRayTracing(gpu.Rtx));
+        Text(sb, "DLSS / апскейл", OnOff(cpu.Dlss), OnOff(gpu.Dlss));
         Text(sb, "Генерация кадров", OnOff(cpu.InsertFrame), OnOff(gpu.InsertFrame));
         Text(sb, "DirectX 12", OnOff(cpu.Dx12), OnOff(gpu.Dx12));
 
@@ -113,4 +113,29 @@ public class ReportPrinter : IReportPrinter
         sb.AppendLine($"  {name,-34}{cpu,22}{gpu,22}");
 
     private static string OnOff(int value) => value == 0 ? "выкл" : $"вкл ({value})";
+
+    private static string FormatQuality(int level) => level switch
+    {
+        1 => "Низкое",
+        2 => "Среднее",
+        3 => "Высокое",
+        4 => "Ультра",
+        5 => "Реалистичное",
+        _ => level.ToString()
+    };
+
+    private static string FormatPreset(int level) => level switch
+    {
+        6 => "Пользовательское",
+        _ => FormatQuality(level)
+    };
+
+    private static string FormatRayTracing(int rtxLevel) => rtxLevel switch
+    {
+        0 => "Выкл",
+        1 => "Вкл (Низкое)",
+        2 => "Вкл (Среднее)",
+        3 => "Вкл (Ультра)",
+        _ => $"Вкл ({rtxLevel})"
+    };
 }
