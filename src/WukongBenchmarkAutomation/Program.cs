@@ -62,12 +62,14 @@ try
     Console.WriteLine();
     Console.WriteLine(report);
     Console.WriteLine($"Отчёт сохранён: {reportPath}");
+    WaitForKey();
     return 0;
 }
 catch (Exception ex)
 {
     Console.WriteLine();
     Console.WriteLine($"ОШИБКА: {ex.Message}");
+    WaitForKey();
     return 1;
 }
 
@@ -75,4 +77,14 @@ static string? GetArg(string[] args, string name)
 {
     var index = Array.IndexOf(args, name);
     return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
+}
+
+static void WaitForKey()
+{
+    if (!Console.IsInputRedirected)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Нажмите любую клавишу для выхода...");
+        Console.ReadKey(intercept: true); // intercept: true скрывает нажатый символ в консоли
+    }
 }
