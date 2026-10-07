@@ -68,7 +68,7 @@ public class GameSettingsWriter : IGameSettingsWriter
 
         var rayTracing = profile.Settings.GetValueOrDefault("Rtx") == 1;
         text = SetLine(text, "sg.RayTracingQuality", "0"); // игра сама держит здесь 0 даже при включённой трассировке (уровень хранится в RtxLevel)
-        text = SetLine(text, "r.RayTracing.EnableInGame", rayTracing ? "True" : "False");
+        text = SetSectionProperty(text, "RayTracing", "r.RayTracing.EnableInGame", rayTracing ? "True" : "False");
 
         // Разрешение, отключение Vsync и лимита FPS
         text = SetUiSetting(text, "Vsync", "0");
@@ -82,7 +82,7 @@ public class GameSettingsWriter : IGameSettingsWriter
         text = SetLine(text, "LastUserConfirmedDesiredScreenHeight", profile.DesiredHeight.ToString());
         text = SetLineOrInsert(text, "DesiredScreenWidth", profile.DesiredWidth.ToString(), after: "LastUserConfirmedDesiredScreenHeight");
         text = SetLineOrInsert(text, "DesiredScreenHeight", profile.DesiredHeight.ToString(), after: "DesiredScreenWidth");
-        text = SetLine(text, "GSStreamingPoolSize", profile.StreamingPoolSize.ToString());
+        text = SetSectionProperty(text, "GSRenderSetting", "GSStreamingPoolSize", profile.StreamingPoolSize.ToString());
         text = SetLine(text, "bUseVSync", "False");
         text = SetLine(text, "FrameRateLimit", "0.000000");
 
@@ -121,5 +121,20 @@ public class GameSettingsWriter : IGameSettingsWriter
             throw new InvalidOperationException($"В GameUserSettings.ini нет строки {after}");
 
         return Regex.Replace(text, afterPattern, m => $"{m.Value}\r\n{key}={value}", RegexOptions.Multiline);
+    }
+
+    // Обновляет Key=Value в указанной секции [Section], либо создает секцию/ключ, если их нет в файле
+    private static string SetSectionProperty(string text, string section, string key, string value)
+    {
+        var keyPattern = $"^{Regex.Escape(key)}=[^\r\n]*";
+        if (Regex.IsMatch(text, keyPattern, RegexOptions.Multiline))
+            return Regex.Replace(text, keyPattern, $"{key}={value}", RegexOptions.Multiline);
+
+        var sectionPattern = $"^\\[{Regex.Escape(section)}\\][^\r\n]*";
+        if (Regex.IsMatch(text, sectionPattern, RegexOptions.Multiline))
+            return Regex.Replace(text, sectionPattern, m => $"{m.Value}\r\n{key}={value}", RegexOptions.Multiline);
+
+        var trimmed = text.TrimEnd();
+        return $"{trimmed}\r\n\r\n[{section}]\r\n{key}={value}\r\n";
     }
 }

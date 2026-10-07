@@ -114,4 +114,50 @@ public class GameSettingsWriterTests : IDisposable
 
         Assert.Throws<FileNotFoundException>(() => writer.Backup());
     }
+
+    [Fact]
+    public void Apply_WorksOnCleanIni_WithoutRayTracingAndRenderSettingSections()
+    {
+        // Абсолютно чистый файл после первого запуска 
+        var cleanIni = """
+        [/Script/GSGameSettings.GSGameUserSettings]
+        UISettingData=(("QualityLevel", "6"),("ViewDistance", "4"),("AntiAliasing", "4"),("PostProcessing", "4"),("ShadowQuality", "4"),("TextureQuality", "4"),("FxQuality", "4"),("MaterialQuality", "4"),("VegetationQuality", "4"),("GlobalIllumination", "4"),("ReflectionQuality", "4"),("SuperResolutionSampling", "2"),("ImageQuality", "1080"),("InsertFrame", "0"),("MotionBlur", "2"),("Rtx", "0"),("RtxLevel", "2"),("Vsync", "0"),("LockFrameRate", "0"),("ScreenMode", "1"))
+        ResolutionSizeX=2560
+        ResolutionSizeY=1440
+        LastUserConfirmedResolutionSizeX=2560
+        LastUserConfirmedResolutionSizeY=1440
+        LastUserConfirmedDesiredScreenWidth=1707
+        LastUserConfirmedDesiredScreenHeight=960
+        DesiredScreenWidth=1707
+        DesiredScreenHeight=960
+        bUseVSync=False
+        FrameRateLimit=0.000000
+
+        [ScalabilityGroups]
+        sg.ResolutionQuality=66.6999969
+        sg.ViewDistanceQuality=3
+        sg.AntiAliasingQuality=3
+        sg.ShadowQuality=3
+        sg.GlobalIlluminationQuality=3
+        sg.RayTracingQuality=0
+        sg.ReflectionQuality=3
+        sg.PostProcessQuality=3
+        sg.TextureQuality=3
+        sg.EffectsQuality=3
+        sg.FoliageQuality=3
+        sg.ShadingQuality=3
+        """;
+
+        File.WriteAllText(_iniPath, cleanIni);
+        var writer = new GameSettingsWriter(_testGameDir);
+        var profile = BenchmarkProfile.CreateCpuProfile(1280, 720, 2560, 1440);
+
+        var exception = Record.Exception(() => writer.Apply(profile));
+        Assert.Null(exception);
+
+        var resultText = File.ReadAllText(_iniPath);
+        Assert.Contains("r.RayTracing.EnableInGame=False", resultText);
+        Assert.Contains("GSStreamingPoolSize=384", resultText);
+        Assert.Contains("ResolutionSizeX=1280", resultText);
+    }
 }
