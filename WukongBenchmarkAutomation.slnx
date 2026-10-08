@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/WukongBenchmarkAutomation.Gui/WukongBenchmarkAutomation.Gui.csproj" Id="f44337b8-cdd0-4e29-96fb-6f6509d42703" />
     <Project Path="src/WukongBenchmarkAutomation/WukongBenchmarkAutomation.csproj" />
   </Folder>
   <Folder Name="/tests/">
