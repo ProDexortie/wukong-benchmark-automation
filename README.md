@@ -34,7 +34,7 @@
 
 В [релизах](https://github.com/ProDexortie/wukong-benchmark-automation/releases/latest) графический интерфейс поставляется отдельным исполняемым файлом `WukongBenchmarkAutomation.Gui.exe` - его можно запускать привычным двойным кликом без необходимости открывать терминал.
 
-![Графический интерфейс Wukong Benchmark Automation Tool](docs/images/gui-screenshot.png)
+![Графический интерфейс Wukong Benchmark Automation Tool](docs/images/gui-screenshot.jpg)
 
 ### Особенности графической версии:
 - Тестирование выполняется в фоновом потоке (`async/await`), интерфейс остаётся отзывчивым во время всех этапов работы.
