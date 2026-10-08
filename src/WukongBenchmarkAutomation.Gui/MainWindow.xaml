@@ -3,10 +3,482 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WukongBenchmarkAutomation.Gui"
+        xmlns:converters="clr-namespace:WukongBenchmarkAutomation.Gui.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Black Myth: Wukong Benchmark Automation Tool"
+        Height="700" Width="1020"
+        MinHeight="650" MinWidth="940"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgDarkBrush}"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="Segoe UI Variable, Segoe UI, sans-serif">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <converters:StepHighlightConverter x:Key="StepHighlight" />
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- Заголовок -->
+            <RowDefinition Height="Auto" />
+            <!-- Этапы выполнения -->
+            <RowDefinition Height="*" />
+            <!-- Основная область -->
+            <RowDefinition Height="Auto" />
+            <!-- Панель кнопок -->
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Border Grid.Row="0"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderLightBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20,16"
+                Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Black Myth: Wukong Benchmark Automation Tool"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource GoldPrimaryBrush}" />
+                    <TextBlock Text="Автоматическое тестирование производительности процессора и видеокарты"
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Статус и таймер -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{StaticResource SurfaceElevatedBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="12,6"
+                            Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Время: " FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                            <TextBlock Text="{Binding ElapsedFormatted}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource GoldPrimaryBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border CornerRadius="6" Padding="12,6">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#22222E" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                        <Setter Property="Background" Value="#382C10" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                        <Setter Property="Background" Value="#0F3820" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding HasError}" Value="True">
+                                        <Setter Property="Background" Value="#401414" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <TextBlock FontSize="12" FontWeight="SemiBold">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Ожидание" />
+                                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                            <Setter Property="Text" Value="Выполняется" />
+                                            <Setter Property="Foreground" Value="{StaticResource GoldPrimaryBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                            <Setter Property="Text" Value="Завершено" />
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessGreenBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding HasError}" Value="True">
+                                            <Setter Property="Text" Value="Ошибка" />
+                                            <Setter Property="Foreground" Value="{StaticResource DangerRedBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Этапы выполнения -->
+        <Border Grid.Row="1"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderLightBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,12"
+                Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Margin="0,0,8,0"
+                             Fill="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=1}" />
+                    <TextBlock Text="1. Инициализация" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=1}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Margin="0,0,8,0"
+                             Fill="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=2}" />
+                    <TextBlock Text="2. CPU-тест" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=2}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Margin="0,0,8,0"
+                             Fill="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=3}" />
+                    <TextBlock Text="3. GPU-тест" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=3}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Margin="0,0,8,0"
+                             Fill="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=5}" />
+                    <TextBlock Text="4. Отчёт и результат" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{Binding CurrentStep, Converter={StaticResource StepHighlight}, ConverterParameter=5}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Основная область -->
+        <Grid Grid.Row="2" Margin="0,0,0,14">
+
+            <!-- В процессе работы -->
+            <Grid Visibility="{Binding IsCompleted, Converter={StaticResource InverseBoolToVis}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Текущее действие и прогресс -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="20,16"
+                        Margin="0,0,0,14">
+                    <StackPanel>
+                        <TextBlock Text="{Binding StatusTitle}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource GoldPrimaryBrush}" />
+                        <TextBlock Text="{Binding StatusDescription}"
+                                   FontSize="13"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,4,0,14" />
+
+                        <ProgressBar IsIndeterminate="{Binding IsRunning}"
+                                     Height="5"
+                                     Foreground="{StaticResource GoldPrimaryBrush}"
+                                     Background="{StaticResource SurfaceElevatedBrush}"
+                                     BorderThickness="0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Журнал работы -->
+                <Border Grid.Row="1"
+                        Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Text="Журнал работы"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   Margin="0,0,0,8" />
+
+                        <ListBox x:Name="LogListBox"
+                                 Grid.Row="1"
+                                 ItemsSource="{Binding LogMessages}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 FontFamily="Consolas, Cascadia Mono, Courier New"
+                                 FontSize="12"
+                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="False"
+                                 VirtualizingPanel.IsVirtualizing="False">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0,2" />
+                                    <Setter Property="Focusable" Value="False" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Результаты после завершения -->
+            <Grid Visibility="{Binding IsCompleted, Converter={StaticResource BoolToVis}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <!-- Характеристики ПК -->
+                    <RowDefinition Height="*" />
+                    <!-- Сравнение CPU и GPU -->
+                </Grid.RowDefinitions>
+
+                <!-- Панель характеристик системы -->
+                <Border Grid.Row="0"
+                        Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderLightBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16,12"
+                        Margin="0,0,0,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Процессор" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
+                            <TextBlock Text="{Binding CpuModelName}" FontSize="13" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}">
+                                <Run Text="Потоков: " /><Run Text="{Binding ProcessorThreads, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Видеокарта" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
+                            <TextBlock Text="{Binding GpuModelName}" FontSize="13" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}">
+                                <Run Text="Драйвер: " /><Run Text="{Binding GpuDriverName, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                            <TextBlock Text="Память и ОС" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" />
+                            <TextBlock Text="{Binding RamSizeText}" FontSize="13" FontWeight="SemiBold" Margin="0,2,0,0" />
+                            <TextBlock Text="{Binding OsVersionText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Карточки CPU и GPU тестов -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- CPU тест -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="18">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="CPU-тест" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                                <!-- Средний FPS -->
+                                <Border Background="{StaticResource SurfaceElevatedBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Средний FPS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding CpuAvgFps}" FontSize="34" FontWeight="Bold" Foreground="{StaticResource GoldPrimaryBrush}" />
+                                            <TextBlock Text=" FPS" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Bottom" Margin="4,0,0,5" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Метрики -->
+                                <UniformGrid Columns="2" Margin="0,0,0,14">
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="0,0,4,4">
+                                        <StackPanel>
+                                            <TextBlock Text="Мин. FPS" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding CpuMinFps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="4,0,0,4">
+                                        <StackPanel>
+                                            <TextBlock Text="Макс. FPS" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding CpuMaxFps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="0,4,4,0">
+                                        <StackPanel>
+                                            <TextBlock Text="95-й перцентиль" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding Cpu95Fps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="4,4,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="VRAM" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding CpuVram}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <!-- Параметры настроек -->
+                                <TextBlock Text="Настройки" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,6" />
+                                <TextBlock Text="• Разрешение: 1280x720, DLSS 25%" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                                <TextBlock Text="• Дальность и растительность: Реалистичное" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                                <TextBlock Text="• Текстуры, тени, шейдеры: Низкое" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                                <TextBlock Text="• Трассировка лучей: Выкл" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+
+                    <!-- GPU тест -->
+                    <Border Grid.Column="2"
+                            Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="18">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="GPU-тест" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                                <!-- Средний FPS -->
+                                <Border Background="{StaticResource SurfaceElevatedBrush}" CornerRadius="8" Padding="14,10" Margin="0,0,0,14">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Средний FPS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
+                                            <TextBlock Text="{Binding GpuAvgFps}" FontSize="34" FontWeight="Bold" Foreground="{StaticResource GoldPrimaryBrush}" />
+                                            <TextBlock Text=" FPS" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Bottom" Margin="4,0,0,5" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Метрики -->
+                                <UniformGrid Columns="2" Margin="0,0,0,14">
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="0,0,4,4">
+                                        <StackPanel>
+                                            <TextBlock Text="Мин. FPS" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding GpuMinFps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="4,0,0,4">
+                                        <StackPanel>
+                                            <TextBlock Text="Макс. FPS" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding GpuMaxFps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="0,4,4,0">
+                                        <StackPanel>
+                                            <TextBlock Text="95-й перцентиль" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding Gpu95Fps}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Background="#1A1A22" CornerRadius="6" Padding="10,8" Margin="4,4,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="VRAM" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding GpuVram}" FontSize="14" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <!-- Параметры настроек -->
+                                <TextBlock Text="Настройки" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,6" />
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2">
+                                    <Run Text="• Разрешение: " /><Run Text="{Binding GpuResolution, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=", DLSS 100%" />
+                                </TextBlock>
+                                <TextBlock Text="• Общий уровень качества: Реалистичное" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                                <TextBlock Text="• Все параметры графики: Максимум" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2" />
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2">
+                                    <Run Text="• Трассировка лучей: " /><Run Text="{Binding GpuRayTracing, Mode=OneWay}" FontWeight="SemiBold" />
+                                </TextBlock>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <!-- Панель кнопок -->
+        <Border Grid.Row="3"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderLightBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16,12">
+            <Grid>
+                <!-- Кнопка прерывания во время работы -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Visibility="{Binding IsCompleted, Converter={StaticResource InverseBoolToVis}}">
+                    <Button Content="Прервать"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Command="{Binding CancelCommand}"
+                            IsEnabled="{Binding IsRunning}"
+                            Width="110" />
+                </StackPanel>
+
+                <!-- Кнопки после завершения -->
+                <DockPanel LastChildFill="False"
+                           Visibility="{Binding IsCompleted, Converter={StaticResource BoolToVis}}">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                        <Button Content="Открыть отчёт"
+                                Style="{StaticResource GoldButtonStyle}"
+                                Command="{Binding OpenReportCommand}"
+                                Margin="0,0,10,0" />
+                        <Button Content="Открыть папку с отчётами"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding OpenFolderCommand}"
+                                Margin="0,0,10,0" />
+                        <Button Content="Скопировать текст отчёта"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding CopyReportCommand}"
+                                Margin="0,0,10,0" />
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Content="Повторить тестирование"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding RestartCommand}"
+                                Margin="0,0,10,0" />
+                        <Button Content="Выход"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="ExitButton_Click"
+                                Width="80" />
+                    </StackPanel>
+                </DockPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
